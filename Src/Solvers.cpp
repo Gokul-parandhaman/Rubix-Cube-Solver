@@ -2,31 +2,41 @@
 #include "Cube.hpp"
 #include <queue>
 #include <unordered_set>
+#include <unordered_map>
 #include <limits>
 #include <algorithm>
 
 std::vector<char> solveBFS(const std::string& startState) {
     if (startState == SOLVED_STATE) return {};
 
-    std::queue<std::pair<std::string, std::vector<char>>> q;
-    std::unordered_set<std::string> visited;
+    std::queue<std::string> q;
+    std::unordered_map<std::string, std::pair<std::string, char>> parentMap;
 
-    q.push({startState, {}});
-    visited.insert(startState);
+    q.push(startState);
+    parentMap[startState] = {"", '\0'};
 
-    while (!q.empty()) {
-        auto [current, path] = q.front();
+    size_t nodesExplored = 0;
+    while (!q.empty() && nodesExplored < 150000) {
+        std::string current = q.front();
         q.pop();
+        nodesExplored++;
 
         for (const auto& [nextState, move] : getNeighbors(current)) {
-            std::vector<char> nextPath = path;
-            nextPath.push_back(move);
-
-            if (nextState == SOLVED_STATE) return nextPath;
-
-            if (visited.find(nextState) == visited.end()) {
-                visited.insert(nextState);
-                q.push({nextState, nextPath});
+            if (parentMap.find(nextState) == parentMap.end()) {
+                parentMap[nextState] = {current, move};
+                
+                if (nextState == SOLVED_STATE) {
+                    std::vector<char> path;
+                    std::string curr = nextState;
+                    while (curr != startState) {
+                        auto p = parentMap[curr];
+                        path.push_back(p.second);
+                        curr = p.first;
+                    }
+                    std::reverse(path.begin(), path.end());
+                    return path;
+                }
+                q.push(nextState);
             }
         }
     }
@@ -61,8 +71,8 @@ std::vector<char> solveDFS(const std::string& startState, int maxDepth) {
 
 struct AStarNode {
     double fScore;
+    int gScore;
     std::string state;
-    std::vector<char> path;
 
     bool operator>(const AStarNode& other) const {
         return fScore > other.fScore;
@@ -71,30 +81,39 @@ struct AStarNode {
 
 std::vector<char> solveAStar(const std::string& startState) {
     std::priority_queue<AStarNode, std::vector<AStarNode>, std::greater<AStarNode>> openSet;
+    std::unordered_map<std::string, std::pair<std::string, char>> parentMap;
     std::unordered_map<std::string, int> gScore;
 
-    openSet.push({getHeuristic(startState), startState, {}});
+    openSet.push({getHeuristic(startState), 0, startState});
     gScore[startState] = 0;
+    parentMap[startState] = {"", '\0'};
 
-    while (!openSet.empty()) {
-        auto [f, current, path] = openSet.top();
+    size_t iterations = 0;
+    while (!openSet.empty() && iterations < 100000) {
+        auto [f, currentG, current] = openSet.top();
         openSet.pop();
+        iterations++;
 
-        if (current == SOLVED_STATE) return path;
-
-        int currentG = gScore[current];
+        if (current == SOLVED_STATE) {
+            std::vector<char> path;
+            std::string curr = current;
+            while (curr != startState) {
+                auto p = parentMap[curr];
+                path.push_back(p.second);
+                curr = p.first;
+            }
+            std::reverse(path.begin(), path.end());
+            return path;
+        }
 
         for (const auto& [nextState, move] : getNeighbors(current)) {
             int tentativeG = currentG + 1;
 
             if (gScore.find(nextState) == gScore.end() || tentativeG < gScore[nextState]) {
                 gScore[nextState] = tentativeG;
+                parentMap[nextState] = {current, move};
                 double nextF = tentativeG + getHeuristic(nextState);
-                
-                std::vector<char> nextPath = path;
-                nextPath.push_back(move);
-                
-                openSet.push({nextF, nextState, nextPath});
+                openSet.push({nextF, tentativeG, nextState});
             }
         }
     }
@@ -134,10 +153,11 @@ std::vector<char> solveIDAStar(const std::string& startState) {
     std::vector<char> pathMoves;
     std::unordered_set<std::string> visited = {startState};
 
-    while (true) {
+    for (int depthLimit = 0; depthLimit < 10; ++depthLimit) {
         double t = idastarSearch(path, pathMoves, 0, bound, visited);
         if (t == -1.0) return pathMoves;
         if (t == std::numeric_limits<double>::infinity()) return {};
         bound = t;
     }
+    return {};
 }
