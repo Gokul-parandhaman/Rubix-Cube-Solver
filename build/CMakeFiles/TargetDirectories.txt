@@ -1,0 +1,3 @@
+C:/Academic/codes/py/Rubix/build/CMakeFiles/rubiks_solver.dir
+C:/Academic/codes/py/Rubix/build/CMakeFiles/edit_cache.dir
+C:/Academic/codes/py/Rubix/build/CMakeFiles/rebuild_cache.dir
