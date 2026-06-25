@@ -18,5 +18,5 @@ A C++ implementation of a standard Rubik's Cube ($3 \times 3 \times 3$) solver u
 | :--- | :--- | :--- | :--- | :--- |
 | **BFS** | Brute-Force / Uninformed | $O(b^d)$ | **Yes** | Optimal for short paths; highly memory-intensive |
 | **DFS** | Brute-Force / Uninformed | $O(d)$ | No | Memory-light; requires depth guards to prevent infinite loops |
-| **A\*** | Informed Search | $O(b^d)$ | **Yes** (with admissible $h(n)$) | Extremely fast for shallow states due to sharp node filtering |
+| **A\*** | Informed Search | $O(b^d)$ | **Yes** | Extremely fast for shallow states due to sharp node filtering |
 | **IDA\*** | Iterative Deepening | $O(d)$ | **Yes** | Balanced memory footprints with optimal path guarantees |
