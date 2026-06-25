@@ -11,10 +11,10 @@ void printSequence(const std::string& name, const std::vector<char>& path) {
 }
 
 int main() {
-    std::cout << "Initializing C++ Rubik's Cube Solver Pipeline...\n";
+    std::cout << "Initializing C++ 3x3x3 Rubik's Cube Solver Pipeline...\n";
     std::cout << "Solved State Profile: " << SOLVED_STATE << "\n\n";
 
-    int scrambleLength = 6; 
+    int scrambleLength = 3; 
     std::vector<char> randomScramble = generateScramble(scrambleLength);
     printSequence("Generated Random Scramble", randomScramble);
 
@@ -24,11 +24,13 @@ int main() {
     }
     std::cout << "Scrambled State configuration: " << scrambled << "\n\n";
 
-    std::cout << "Executing Search Implementations\n";
+    std::cout << "Executing Search Implementations...\n";
+    
     printSequence("BFS Solution  ", solveBFS(scrambled));
-    printSequence("DFS Solution  ", solveDFS(scrambled, 10));
+    
     printSequence("A* Solution   ", solveAStar(scrambled));
-    printSequence("IDA* Solution ", solveIDAStar(scrambled));
+    
+    printSequence("DFS Solution  ", solveDFS(scrambled, 3));
 
     return 0;
 }
